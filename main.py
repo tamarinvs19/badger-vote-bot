@@ -148,14 +148,12 @@ def main() -> None:
 
     application.add_handler(PollAnswerHandler(poll_answer))
 
-    # Run the bot until the user presses Ctrl-C
-    application.start_webhook(
+    application.run_webhook(
         listen="0.0.0.0",
         port=cfg.PORT,
         url_path=cfg.TOKEN,
         webhook_url=f'https://{cfg.APPNAME}.herokuapp.com/' + cfg.TOKEN,
     )
-    application.idle()
 
 
 if __name__ == "__main__":
