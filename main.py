@@ -2,7 +2,7 @@ import datetime
 import logging
 import os
 
-from telegram import Update
+from telegram import Update, KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes, filters, PollAnswerHandler
 
 # Enable logging
@@ -17,12 +17,17 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+button_help = KeyboardButton('/help')
+button_list = KeyboardButton('/list')
+
+greet_kb = ReplyKeyboardMarkup([[button_help, button_list]], True)
+
 
 async def start_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
-    await context.bot.send_message(
-        chat_id=update.effective_chat.id,
-        text=f'Привет, {user.full_name}!',
+    await update.message.reply_text(
+        f'Привет, {user.full_name}!',
+        reply_markup=greet_kb
     )
 
 
