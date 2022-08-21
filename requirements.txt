@@ -1,1 +1,1 @@
-python-telegram-bot=v20.0a2
+python-telegram-bot==v20.0a2
