@@ -18,6 +18,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+async def start_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    user = update.effective_user
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text=f'Привет, {user.full_name}!',
+    )
+
+
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
     await update.message.reply_markdown("""
@@ -131,6 +139,7 @@ def main() -> None:
     application = Application.builder().token(cfg.TOKEN).build()
 
     # on different commands - answer in Telegram
+    application.add_handler(CommandHandler("start", start_bot))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("list", show_suggestion_list))
     application.add_handler(CommandHandler("add", add_suggestion))
