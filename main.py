@@ -140,8 +140,6 @@ def main() -> None:
     application.add_handler(PollAnswerHandler(poll_answer))
 
     # Run the bot until the user presses Ctrl-C
-    application.run_polling()
-
     application.start_webhook(
         listen="0.0.0.0",
         port=cfg.PORT,
