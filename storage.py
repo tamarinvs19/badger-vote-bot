@@ -17,6 +17,11 @@ class Storage(object):
             cls.votes = {}
         return cls.obj
 
+    def get_suggestion_id_by_text(self, text: str) -> int:
+        for pk, suggestion in self.suggestions.items():
+            if suggestion.text == text:
+                return pk
+
     def can_user_add_suggestion_today(self, user_id: int) -> bool:
         for suggestion in self.suggestions.values():
             date_check = (datetime.date.today() - suggestion.created_at.date()) < datetime.timedelta(days=1)
@@ -44,11 +49,8 @@ class Storage(object):
 
         results = self.get_results()
         try:
-            print(results, results.most_common())
-            most_popular = results.most_common()[0]
-            print(most_popular, self.suggestions)
-            self.suggestions.pop(most_popular[1])
-            most_popular = most_popular[0]
+            most_popular = results.most_common()[0][0]
+            self.suggestions.pop(self.get_suggestion_id_by_text(most_popular))
         except KeyError:
             most_popular = "Ни одного предложения"
 
