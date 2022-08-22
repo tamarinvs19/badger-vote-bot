@@ -64,6 +64,8 @@ async def show_suggestion_list(update: Update, context: ContextTypes.DEFAULT_TYP
             (suggestion.text, suggestion.pk)
             for suggestion in suggestions
         ]))
+        logger.debug(suggestion_texts)
+
         message = await context.bot.send_poll(
             update.effective_chat.id,
             "Список предложений:",
@@ -88,7 +90,9 @@ async def add_suggestion(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
     suggestion_text = ' '.join(context.args)
     storage = Storage()
-    if storage.can_user_add_suggestion_today(update.effective_user.id):
+    if len(suggestion_text.strip()) == 0:
+        await update.message.reply_text("Слишком короткое название! Пример правильной команды: /add Имперский марш")
+    elif storage.can_user_add_suggestion_today(update.effective_user.id):
         Storage().add_suggestion(
             Suggestion(suggestion_text, update.effective_user.id)
         )
