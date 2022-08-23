@@ -126,7 +126,8 @@ async def poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         user_id = update.effective_user.id
         storage = Storage()
         session: Session = storage.__class__.db()
-        session.delete(session.query(Vote).filter_by(user_id=user_id).first())
+        vote = session.query(Vote).where(Vote.user_id == user_id)
+        session.delete(vote)
         session.add(
             Vote(user_id=update.effective_user.id, suggestion_id=suggestion_ids[option_id])
         )
