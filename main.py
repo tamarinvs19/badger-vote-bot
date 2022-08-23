@@ -4,7 +4,7 @@ import logging
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes, filters, PollAnswerHandler
 
-from models import Suggestion, Base
+from models import Suggestion, Base, Vote
 from storage import Storage
 import database
 
@@ -122,9 +122,14 @@ async def poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     selected_options = answer.option_ids
     for option_id in selected_options:
+        user_id = update.effective_user.id
         storage = Storage()
-        storage.votes[update.effective_user.id] = suggestion_ids[option_id]
-        storage.save()
+        session = storage.db()
+        session.delete(session.query(Vote).filter_by(user_id=user_id))
+        session.add(
+            Vote(user_id=update.effective_user.id, suggestion_id=suggestion_ids[option_id])
+        )
+        session.commit()
 
     await update.message.reply_text("Голос принят!")
 
