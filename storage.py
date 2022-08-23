@@ -60,7 +60,10 @@ class Storage(object):
         except KeyError:
             most_popular = "Ни одного предложения"
 
-        session.delete(self.votes.values())
+        for vote in self.votes.values():
+            v = session.query(Vote).get(vote.pk)
+            session.delete(v)
+
         session.commit()
 
         return most_popular
