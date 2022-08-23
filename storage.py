@@ -9,8 +9,11 @@ import database
 
 
 def get_db():
-    db = database.SessionLocal()
-    yield db
+    try:
+        db = database.SessionLocal()
+        yield db
+    finally:
+        db.close()
 
 
 class Storage(object):
@@ -21,10 +24,10 @@ class Storage(object):
     db: Session
 
     @classmethod
-    def __new__(cls, db: Session, *args):
+    def __new__(cls, *args):
         if cls.obj is None:
             cls.obj = object.__new__(cls)
-        cls.db = db
+        cls.db = get_db()
         cls.load_suggestions()
         return cls.obj
 

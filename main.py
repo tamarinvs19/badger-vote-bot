@@ -54,7 +54,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def show_suggestion_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Show all suggestions."""
 
-    suggestions = list(Storage(database.SessionLocal).suggestions.values())
+    suggestions = list(Storage(get).suggestions.values())
 
     if len(suggestions) == 0:
         await update.message.reply_text(f"Предложений нет")

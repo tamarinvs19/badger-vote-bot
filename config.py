@@ -13,5 +13,5 @@ APPNAME = 'badger-vote-bot'
 try:
     URL = os.environ['URL']
 except KeyError:
-    with open('database_url', 'w') as fout:
+    with open('database_url', 'r') as fout:
         URL = fout.readline().strip()
