@@ -1,6 +1,7 @@
 import datetime
 import logging
 
+from sqlalchemy.orm import Session
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes, filters, PollAnswerHandler
 
@@ -124,7 +125,8 @@ async def poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     for option_id in selected_options:
         user_id = update.effective_user.id
         storage = Storage()
-        session = storage.__class__.db()
+        session: Session = storage.__class__.db()
+        print(session.query(Vote).filter(lambda x: x.user_id == user_id))
         session.delete(session.query(Vote).filter_by(user_id=user_id))
         session.add(
             Vote(user_id=update.effective_user.id, suggestion_id=suggestion_ids[option_id])
