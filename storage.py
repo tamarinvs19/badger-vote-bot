@@ -55,7 +55,8 @@ class Storage(object):
         try:
             most_popular = results.most_common()[0][0]
             most_popular_suggestion = self.get_suggestion_id_by_text(most_popular)
-            session.delete(most_popular_suggestion)
+            mp = session.query(Suggestion).get(most_popular_suggestion.pk)
+            session.delete(mp)
         except KeyError:
             most_popular = "Ни одного предложения"
 
