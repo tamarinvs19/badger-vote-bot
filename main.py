@@ -104,7 +104,6 @@ async def add_suggestion(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 created_at=datetime.datetime.today(),
             )
         )
-        storage.save()
         await update.message.reply_text("Добавил!")
     else:
         await update.message.reply_text("За день можно добавить свой вариант только один раз!")
@@ -125,9 +124,8 @@ async def poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     for option_id in selected_options:
         user_id = update.effective_user.id
         storage = Storage()
-        session: Session = storage.__class__.db()
-        vote = session.query(Vote).where(Vote.user_id == user_id)
-        session.delete(vote)
+        session = storage.session
+        session.delete(storage.votes[user_id])
         session.add(
             Vote(user_id=update.effective_user.id, suggestion_id=suggestion_ids[option_id])
         )

@@ -19,6 +19,7 @@ class Storage(object):
     votes: dict[int, Vote] = {}  # user_id -> suggestion_id
     url: str = cfg.URL
     db: Callable[[], Session] = get_db
+    session: Session
 
     @classmethod
     def __new__(cls, *args):
@@ -30,6 +31,7 @@ class Storage(object):
     @classmethod
     def load_suggestions(cls):
         session = cls.db()
+        cls.session = session
         suggestions = session.query(Suggestion).all()
         cls.suggestions = {
             suggestion.pk: suggestion
@@ -43,15 +45,14 @@ class Storage(object):
 
     @classmethod
     def save(cls, objs):
-        session = cls.db()
-        session.add_all(objs)
-        session.commit()
+        cls.session.add_all(objs)
+        cls.session.commit()
 
     def clear(self) -> str:
         """Clear today votes and return the most popular suggestion."""
 
         results = self.get_results()
-        session = self.__class__.db()
+        session = self.session
         try:
             most_popular = results.most_common()[0][0]
             most_popular_suggestion = self.get_suggestion_id_by_text(most_popular)
