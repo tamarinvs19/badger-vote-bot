@@ -7,6 +7,8 @@ authors = ["Vyacheslav Tamarin <tamarin.vs@ya.ru>"]
 [tool.poetry.dependencies]
 python = "^3.10"
 python-telegram-bot = "v20.0a2"
+psycopg2 = "^2.9.3"
+SQLAlchemy = "^1.4.40"
 
 [tool.poetry.dev-dependencies]
 

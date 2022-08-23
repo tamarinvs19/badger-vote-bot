@@ -1,13 +1,12 @@
 import datetime
 import logging
-import os
 
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes, filters, PollAnswerHandler
 
-# Enable logging
-from models import Suggestion
+from models import Suggestion, Base
 from storage import Storage
+import database
 
 import config as cfg
 
@@ -16,6 +15,10 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
+
+
+Base.metadata.create_all(bind=database.engine)
+
 
 button_help = KeyboardButton('/help')
 button_list = KeyboardButton('/list')
@@ -93,9 +96,14 @@ async def add_suggestion(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     if len(suggestion_text.strip()) == 0:
         await update.message.reply_text("Слишком короткое название! Пример правильной команды: /add Имперский марш")
     elif storage.can_user_add_suggestion_today(update.effective_user.id):
-        Storage().add_suggestion(
-            Suggestion(suggestion_text, update.effective_user.id)
+        storage.add_suggestion(
+            Suggestion(
+                text=suggestion_text,
+                creator_id=update.effective_user.id,
+                created_at=datetime.datetime.today(),
+            )
         )
+        storage.save()
         await update.message.reply_text("Добавил!")
     else:
         await update.message.reply_text("За день можно добавить свой вариант только один раз!")
@@ -114,7 +122,9 @@ async def poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     selected_options = answer.option_ids
     for option_id in selected_options:
-        Storage().votes[update.effective_user.id] = suggestion_ids[option_id]
+        storage = Storage()
+        storage.votes[update.effective_user.id] = suggestion_ids[option_id]
+        storage.save()
 
     await update.message.reply_text("Голос принят!")
 

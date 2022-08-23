@@ -9,3 +9,9 @@ except KeyError:
 
 PORT = int(os.environ.get('PORT', 8443))
 APPNAME = 'badger-vote-bot'
+
+try:
+    URL = os.environ['URL']
+except KeyError:
+    with open('database_url', 'w') as fout:
+        URL = fout.readline().strip()

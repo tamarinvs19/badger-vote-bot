@@ -1,38 +1,26 @@
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, DateTime
+from sqlalchemy import create_engine
+from sqlalchemy.schema import UniqueConstraint
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+
 from datetime import datetime
 
 
-class IdGenerator(object):
-    obj = None
-    current_id = 0
-
-    @classmethod
-    def __new__(cls, *args):
-        if cls.obj is None:
-            cls.obj = object.__new__(cls)
-        return cls.obj
-
-    def next_id(self):
-        self.current_id += 1
-        return self.current_id
+Base = declarative_base()
 
 
-class Suggestion(object):
-    pk: int
-    text: str
-    voter_count: int
-    creator_id: int
-    created_at: datetime.date
+class Suggestion(Base):
+    __tablename__ = 'suggestions'
+    pk: int = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    text: str = Column(String(127))
+    voter_count: int = Column(Integer)
+    creator_id: int = Column(Integer)
+    created_at: datetime.date = Column(DateTime)
 
-    def __init__(
-            self,
-            text: str,
-            creator_id: int,
-    ) -> None:
-        self.pk = IdGenerator().next_id()
-        self.text = text
-        self.voter_count = 0
-        self.creator_id = creator_id
-        self.created_at = datetime.today()
 
-    def __str__(self) -> str:
-        return self.text
+class Vote(Base):
+    __tablename__ = 'votes'
+    pk: int = Column(Integer, primary_key=True, nullable=False, autoincrement=True)
+    user_id: int = Column(Integer)
+    suggestion_id: int = Column(Integer)

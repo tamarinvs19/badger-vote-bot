@@ -1,1 +1,3 @@
 python-telegram-bot==v20.0a2
+psycopg2==2.9.3
+SQLAlchemy==1.4.40
