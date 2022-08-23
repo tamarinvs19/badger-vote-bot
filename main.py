@@ -37,7 +37,8 @@ async def start_bot(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /help is issued."""
-    await update.message.reply_markdown("""
+    await update.message.reply_markdown(
+        """
         Здесь можно предложить свой вариант музыки на подъем.
         
         *Команды*
@@ -49,7 +50,9 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             За один день можно предложить только один трек.
             Голосовать можно сколько угодно раз, сохраняется только последний голос.
             Результаты скрыты, чтобы сохранялась интрига)
-    """)
+        """,
+        reply_markup=greet_kb,
+    )
 
 
 async def show_suggestion_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -95,7 +98,10 @@ async def add_suggestion(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     suggestion_text = ' '.join(context.args)
     storage = Storage()
     if len(suggestion_text.strip()) == 0:
-        await update.message.reply_text("Слишком короткое название! Пример правильной команды: /add Имперский марш")
+        await update.message.reply_text(
+            "Слишком короткое название! Пример корректной команды: /add Имперский марш",
+            reply_markup=greet_kb,
+        )
     elif storage.can_user_add_suggestion_today(update.effective_user.id):
         storage.add_suggestion(
             Suggestion(
@@ -104,9 +110,15 @@ async def add_suggestion(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 created_at=datetime.datetime.today(),
             )
         )
-        await update.message.reply_text("Добавил!")
+        await update.message.reply_text(
+            "Добавил!",
+            reply_markup=greet_kb,
+        )
     else:
-        await update.message.reply_text("За день можно добавить свой вариант только один раз!")
+        await update.message.reply_text(
+            "За день можно добавить свой вариант только один раз!",
+            reply_markup=greet_kb,
+        )
 
 
 async def poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -135,6 +147,8 @@ async def poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     await context.bot.send_message(
         chat_id=answered_poll['chat_id'],
         text="Голос принят!",
+        reply_to_message_id=answered_poll['message_id'],
+        reply_markup=greet_kb,
     )
 
 
@@ -143,13 +157,15 @@ async def show_results(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     suggestions = Storage().get_results()
     if len(suggestions) == 0:
-        await update.message.reply_text("Нет ни одного предложения!")
+        await update.message.reply_text(
+            "Нет ни одного предложения!",
+        )
     else:
         await update.message.reply_text(
             "\n".join([
                 f"{suggestion}: {count}"
                 for suggestion, count in suggestions.items()
-            ])
+            ]),
         )
 
 
