@@ -54,7 +54,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def show_suggestion_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Show all suggestions."""
 
-    suggestions = list(Storage().suggestions.values())
+    suggestions = list(Storage(database.SessionLocal).suggestions.values())
 
     if len(suggestions) == 0:
         await update.message.reply_text(f"Предложений нет")
@@ -92,7 +92,7 @@ async def add_suggestion(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     """Add new suggestion."""
 
     suggestion_text = ' '.join(context.args)
-    storage = Storage()
+    storage = Storage(database.SessionLocal)
     if len(suggestion_text.strip()) == 0:
         await update.message.reply_text("Слишком короткое название! Пример правильной команды: /add Имперский марш")
     elif storage.can_user_add_suggestion_today(update.effective_user.id):
@@ -122,7 +122,7 @@ async def poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     selected_options = answer.option_ids
     for option_id in selected_options:
-        storage = Storage()
+        storage = Storage(database.SessionLocal)
         storage.votes[update.effective_user.id] = suggestion_ids[option_id]
         storage.save()
 
@@ -132,7 +132,7 @@ async def poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 async def show_results(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Show all results."""
 
-    suggestions = Storage().get_results()
+    suggestions = Storage(database.SessionLocal).get_results()
     if len(suggestions) == 0:
         await update.message.reply_text("Нет ни одного предложения!")
     else:
@@ -147,7 +147,7 @@ async def show_results(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def clear_votes(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Delete all votes."""
 
-    most_common = Storage().clear()
+    most_common = Storage(database.SessionLocal).clear()
     await update.message.reply_text(f"Самое популярное: {most_common}")
 
 
