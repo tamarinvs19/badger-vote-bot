@@ -132,7 +132,10 @@ async def poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         session.commit()
 
-    await update.message.reply_text("Голос принят!")
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Голос принят!",
+    )
 
 
 async def show_results(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
