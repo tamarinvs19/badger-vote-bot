@@ -1,5 +1,6 @@
 import datetime
 from collections import Counter
+from typing import Callable
 
 from sqlalchemy.orm import Session
 
@@ -8,12 +9,8 @@ import config as cfg
 import database
 
 
-def get_db():
-    try:
-        db = database.SessionLocal()
-        yield db
-    finally:
-        db.close()
+def get_db() -> Session:
+    return database.SessionLocal()
 
 
 class Storage(object):
@@ -21,48 +18,49 @@ class Storage(object):
     suggestions: dict[int, Suggestion] = {}  # suggestion_id -> Suggestion
     votes: dict[int, Vote] = {}  # user_id -> suggestion_id
     url: str = cfg.URL
-    db: Session
+    db: Callable[[], Session] = get_db
 
     @classmethod
     def __new__(cls, *args):
         if cls.obj is None:
             cls.obj = object.__new__(cls)
-        cls.db = get_db()
         cls.load_suggestions()
         return cls.obj
 
     @classmethod
     def load_suggestions(cls):
-        suggestions = cls.db.query(Suggestion).all()
+        session = cls.db()
+        suggestions = session.query(Suggestion).all()
         cls.suggestions = {
             suggestion.pk: suggestion
             for suggestion in suggestions
         }
-        votes = cls.db.query(Vote).all()
+        votes = session.query(Vote).all()
         cls.votes = {
             vote.user_id: vote
             for vote in votes
         }
 
     @classmethod
-    def save(cls):
-        cls.db.add_all(cls.suggestions.values())
-        cls.db.add_all(cls.votes.values())
-        cls.db.commit()
+    def save(cls, objs):
+        session = cls.db()
+        session.add_all(objs)
+        session.commit()
 
     def clear(self) -> str:
         """Clear today votes and return the most popular suggestion."""
 
         results = self.get_results()
+        session = self.db()
         try:
             most_popular = results.most_common()[0][0]
             most_popular_suggestion = self.get_suggestion_id_by_text(most_popular)
-            self.db.delete(most_popular_suggestion)
+            session.delete(most_popular_suggestion)
         except KeyError:
             most_popular = "Ни одного предложения"
 
-        self.db.delete(self.votes.values())
-        self.db.commit()
+        session.delete(self.votes.values())
+        session.commit()
 
         return most_popular
 
@@ -79,7 +77,7 @@ class Storage(object):
         return True
 
     def add_suggestion(self, suggestion: Suggestion):
-        self.suggestions[suggestion.pk] = suggestion
+        self.save([suggestion])
 
     def get_results(self) -> Counter[str]:
         results = Counter()
