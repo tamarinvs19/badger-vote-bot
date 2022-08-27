@@ -50,6 +50,7 @@ class Storage(object):
 
     @classmethod
     def remove_suggetion(cls, suggestion_id):
+        cls.session.query(Vote).filter(Vote.suggestion_id == suggestion_id).delete()
         cls.session.query(Suggestion).filter(Suggestion.pk == suggestion_id).delete()
         cls.session.commit()
 
