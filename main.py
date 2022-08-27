@@ -176,6 +176,14 @@ async def clear_votes(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     await update.message.reply_text(f"Самое популярное: {most_common}")
 
 
+async def remove_suggestion(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Delete suggestion."""
+
+    suggestion_id = context.args[0]
+    Storage().remove_suggetion(suggestion_id)
+    await update.message.reply_text(f"Удалено: {suggestion_id}")
+
+
 def main() -> None:
     """Start the bot."""
 
@@ -189,6 +197,7 @@ def main() -> None:
     application.add_handler(CommandHandler("add", add_suggestion))
     application.add_handler(CommandHandler("results", show_results, filters.User(username="@vtamarin")))
     application.add_handler(CommandHandler("clear", clear_votes, filters.User(username="@vtamarin")))
+    application.add_handler(CommandHandler("remove", remove_suggestion, filters.User(username="@vtamarin")))
 
     application.add_handler(PollAnswerHandler(poll_answer))
 

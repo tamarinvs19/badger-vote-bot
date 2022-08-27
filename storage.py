@@ -48,6 +48,11 @@ class Storage(object):
         cls.session.add_all(objs)
         cls.session.commit()
 
+    @classmethod
+    def remove_suggetion(cls, suggestion_id):
+        cls.session.query(Suggestion).filter(Suggestion.pk == suggestion_id).delete()
+        cls.session.commit()
+
     def clear(self) -> str:
         """Clear today votes and return the most popular suggestion."""
 
@@ -76,7 +81,7 @@ class Storage(object):
 
     def can_user_add_suggestion_today(self, user_id: int) -> bool:
         for suggestion in self.suggestions.values():
-            date_check = (datetime.date.today() - suggestion.created_at.date()) < datetime.timedelta(days=1)
+            date_check = (datetime.date.today() - suggestion.created_at.date()) < datetime.timedelta(hours=6)
             if suggestion.creator_id == user_id and date_check:
                 return False
         return True
