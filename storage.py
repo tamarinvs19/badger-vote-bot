@@ -94,10 +94,14 @@ class Storage(object):
         results = Counter()
 
         for vote in self.votes.values():
-            results[self.suggestions[vote.suggestion_id].text] += 1
+            suggestion = self.suggestions[vote.suggestion_id]
+            name = f'{suggestion.text} (#id = {suggestion.pk})'
+            results[name] += 1
 
         for suggestion in self.suggestions.values():
-            if suggestion.text not in results:
+            suggestion = self.suggestions[vote.suggestion_id]
+            name = f'{suggestion.text} (#id = {suggestion.pk})'
+            if name not in results:
                 results[suggestion.text] = 0
 
         return results
